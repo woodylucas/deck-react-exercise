@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import React, { Component } from "react";
 import axios from "axios";
+import Card from "./Card";
 const API_BASE_URL = `https://deckofcardsapi.com/api/deck/`;
 class Deck extends Component {
   constructor(props) {
@@ -20,16 +21,16 @@ class Deck extends Component {
     let id = this.state.deck.deck_id;
 
     try {
-      // make a request using deck id
       let cardUrl = `${API_BASE_URL}/${id}/draw/`;
-      let cardResp = await axios.get(cardUrl);
-      if (!cardResp.data.success) {
+      let cardRes = await axios.get(cardUrl);
+      if (!cardRes.data.success) {
         throw new Error("No card remaining!");
       }
-      const card = cardResp.data.cards[0];
-      this.setState((currState) => ({
+      let card = cardRes.data.cards[0];
+      console.log(cardRes.data);
+      this.setState((st) => ({
         drawn: [
-          ...currState.drawn,
+          ...st.drawn,
           {
             id: card.code,
             image: card.image,
@@ -40,14 +41,23 @@ class Deck extends Component {
     } catch (err) {
       alert(err);
     }
-    // set state using new card info from api
   }
 
   render() {
+    // conditional rendering
+    let cards;
+    // if the array exist ?
+    if (this.state.drawn) {
+      cards = this.state.drawn.map((c) => (
+        <Card key={c.id} name={c.name} image={c.image} />
+      ));
+    }
+
     return (
       <div>
         <h1>Deck</h1>
         <button onClick={this.getCard}>Get Card!</button>
+        {cards}
       </div>
     );
   }
